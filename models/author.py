@@ -8,7 +8,7 @@ class Author:
 
     def __repr__(self):
         return f'<Author {self.name}>'
-    
+
     def _create_author(self):
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -38,25 +38,14 @@ class Author:
             raise ValueError("Name must be a non-empty string")
         self._name = value
 
-    def articles(self):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT * FROM articles WHERE author_id = ?
-        ''', (self.id,))
-        articles = cursor.fetchall()
-        conn.close()
-        return articles
+    def articles(self, articles):
+        return [article for article in articles if article.author_id == self.id]
+    
+    def magazines(self, articles, magazines):
+        magazine_ids = {article.magazine_id for article in articles if article.author_id == self.id}
+        return [magazine.id for magazine in magazines if magazine.id in magazine_ids]
 
-    def magazines(self):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT DISTINCT magazines.* FROM magazines
-            JOIN articles ON magazines.id = articles.magazine_id
-            WHERE articles.author_id = ?
-        ''', (self.id,))
-        magazines = cursor.fetchall()
-        conn.close()
-        return magazines
 
+    # def magazines(self, articles, magazines):
+    #     magazine_ids = {article.magazine_id for article in articles if article.author_id == self.id}
+    #     return [magazine for magazine in magazines if magazine.id in magazine_ids] 
